@@ -1,4 +1,5 @@
 import 'package:chatapp/pages/auth/register_page.dart';
+import 'package:chatapp/service/auth_service.dart';
 import 'package:chatapp/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   String email = "";
   String password = "";
   final bool _isLoading = false;
+  AuthServices authServices = AuthServices();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,5 +136,5 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void login() {}
+  void login() async {}
 }
