@@ -1,6 +1,11 @@
+import 'package:chatapp/helper/helper_function.dart';
 import 'package:chatapp/pages/auth/register_page.dart';
+import 'package:chatapp/pages/home_page.dart';
 import 'package:chatapp/service/auth_service.dart';
+import 'package:chatapp/service/database_service.dart';
 import 'package:chatapp/widgets/widgets.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +20,8 @@ class _LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
   String email = "";
   String password = "";
-  final bool _isLoading = false;
-  AuthServices authServices = AuthServices();
+  bool _isLoading = false;
+  AuthServices authService = AuthServices();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,5 +141,31 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void login() async {}
+  login() async {
+    if (formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      await authService
+          .loginWithUserNameandPassword(email, password)
+          .then((value) async {
+        if (value == true) {
+          QuerySnapshot snapshot =
+              await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+                  .gettingUserData(email);
+          // saving the values to our shared preferences
+          await HelperFunctions.saveUserLoggedInStatus(true);
+          await HelperFunctions.saveUserEmailSF(email);
+          await HelperFunctions.saveUserNameSF(snapshot.docs[0]['fullName']);
+          // ignore: use_build_context_synchronously
+          nextScreenReplace(context, const HomePage());
+        } else {
+          showSnackbar(context, Colors.red, value);
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      });
+    }
+  }
 }
